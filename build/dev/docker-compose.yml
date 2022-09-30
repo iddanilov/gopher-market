@@ -1,0 +1,11 @@
+version: "2.2"
+
+services:
+  postgres:
+    image: postgres:10.14
+    environment:
+      POSTGRES_DB: gopher_market
+      POSTGRES_USER: gopher_market
+      POSTGRES_PASSWORD: gopher_market
+    ports:
+      - "6432:5432"
