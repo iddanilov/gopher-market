@@ -27,14 +27,19 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		{
 			user.POST("/register", h.registration)
 			user.POST("/login", h.login)
-			user.GET("/balance", h.getUserBalance)
-			user.GET("/balance/withdraw", h.getBalanceWithdraw)
 		}
 
-		orders := api.Group("/orders")
+		orders := user.Group("/orders", h.userIdentity)
 		{
-			orders.GET("/", h.GetOrders)
-			orders.PUT("/", h.SaveOrder)
+			orders.POST("/", h.loadOrder)
+			orders.GET("/", h.getOrders)
+		}
+
+		balance := user.Group("/balance")
+		{
+			balance.GET("/", h.getUserBalance)
+			balance.POST("/withdraw", h.getBalanceWithdraw)
+			balance.GET("/withdrawals", h.getBalanceWithdrawals)
 		}
 	}
 

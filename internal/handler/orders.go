@@ -1,53 +1,42 @@
 package handler
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+	"io/ioutil"
+	"net/http"
+)
 
-func (h *Handler) SaveOrder(c *gin.Context) {
+func (h *Handler) loadOrder(c *gin.Context) {
+	userID, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	responseData, err := ioutil.ReadAll(c.Request.Body)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+	}
+	err = h.services.Orders.LoadOrder(userID, string(responseData))
+	if err != nil {
+		//newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	//id, err := strconv.Atoi(c.Param("id"))
-	//
-	//userId, err := getUserId(c)
-	//if err != nil {
-	//	//newErrorResponse(c, http.StatusInternalServerError, err.Error())
-	//	return
-	//}
-
-	//id, err := strconv.Atoi(c.Param("id"))
-	//if err != nil {
-	//	//newErrorResponse(c, http.StatusBadRequest, "invalid id param")
-	//	return
-	//}
-	//
-	//list, err := h.services.TodoList.GetById(userId, id)
-	//if err != nil {
-	//	//newErrorResponse(c, http.StatusInternalServerError, err.Error())
-	//	return
-	//}
-
-	//c.JSON(http.StatusOK, list)
+	c.JSON(http.StatusOK, err)
 }
 
-func (h *Handler) GetOrders(c *gin.Context) {
+func (h *Handler) getOrders(c *gin.Context) {
+	userID, err := getUserId(c)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	//id, err := strconv.Atoi(c.Param("id"))
-	//
-	//userId, err := getUserId(c)
-	//if err != nil {
-	//	//newErrorResponse(c, http.StatusInternalServerError, err.Error())
-	//	return
-	//}
+	orders, err := h.services.Orders.GetOrders(userID)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	//id, err := strconv.Atoi(c.Param("id"))
-	//if err != nil {
-	//	//newErrorResponse(c, http.StatusBadRequest, "invalid id param")
-	//	return
-	//}
-	//
-	//list, err := h.services.TodoList.GetById(userId, id)
-	//if err != nil {
-	//	//newErrorResponse(c, http.StatusInternalServerError, err.Error())
-	//	return
-	//}
-
-	//c.JSON(http.StatusOK, list)
+	c.JSON(http.StatusOK, orders)
 }

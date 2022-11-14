@@ -12,18 +12,25 @@ type Authorization interface {
 }
 
 type Orders interface {
-	SaveOrder(orderID string) error
+	LoadOrder(userID int, orderID string) error
+	GetOrders(userID int) ([]models.Order, error)
+}
+
+type Balance interface {
+	LoadOrder(orderID string) error
 	GetOrders(userID string) ([]string, error)
 }
 
 type Service struct {
 	Authorization
 	Orders
+	Balance
 }
 
 func NewService(repos *storage.Storage) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
 		Orders:        NewOrderService(repos.Orders),
+		//Balance:       NewBalanceService(repos.Balance),
 	}
 }
