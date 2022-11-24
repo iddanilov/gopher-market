@@ -15,10 +15,11 @@ func (h *Handler) loadOrder(c *gin.Context) {
 	responseData, err := ioutil.ReadAll(c.Request.Body)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
 	}
 	err = h.services.Orders.LoadOrder(userID, string(responseData))
 	if err != nil {
-		//newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 

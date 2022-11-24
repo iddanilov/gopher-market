@@ -35,11 +35,11 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			orders.GET("/", h.getOrders)
 		}
 
-		balance := user.Group("/balance")
+		balance := user.Group("/balance", h.userIdentity)
 		{
 			balance.GET("/", h.getUserBalance)
-			balance.POST("/withdraw", h.getBalanceWithdraw)
-			balance.GET("/withdrawals", h.getBalanceWithdrawals)
+			balance.POST("/withdraw", h.withdraw)
+			balance.GET("/withdrawals", h.getWithdrawals)
 		}
 	}
 

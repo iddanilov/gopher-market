@@ -9,3 +9,10 @@ type Order struct {
 	Accrual    string     `json:"accrual,omitempty" db:"accrual" `
 	UploadedAt *time.Time `json:"uploaded_at" db:"uploaded_at"`
 }
+
+type AccrualOrder struct {
+	Order      string     `json:"order" db:"order_number" binding:"required"`
+	Status     string     `json:"status" db:"status" binding:"required"`
+	Accrual    int        `json:"accrual,omitempty" db:"accrual" `
+	UploadedAt *time.Time `json:"uploaded_at" db:"uploaded_at"`
+}

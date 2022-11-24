@@ -39,7 +39,7 @@ func NewApp(cfg *config.Config, logger *logging.Logger) (App, error) {
 
 	logger.Println("router initializing")
 	newStorage := storage.NewStorage(db)
-	services := service.NewService(newStorage)
+	services := service.NewService(newStorage, cfg)
 	routers := handler.NewHandler(services)
 
 	return App{
@@ -72,9 +72,9 @@ func (a *App) startHTTP() {
 			a.logger.Fatal(err)
 		}
 	} else {
-		a.logger.Infof("bind application to host: %s and port: %s", a.cfg.Listen.BindIP, a.cfg.Listen.Port)
+		a.logger.Infof("bind application to host and port: %s", a.cfg.Listen.RunAddress)
 		var err error
-		listener, err = net.Listen("tcp", fmt.Sprintf("%s:%s", a.cfg.Listen.BindIP, a.cfg.Listen.Port))
+		listener, err = net.Listen("tcp", fmt.Sprintf("%s", a.cfg.Listen.RunAddress))
 		if err != nil {
 			a.logger.Fatal(err)
 		}

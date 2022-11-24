@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+	"github.com/gopher-market/internal/config"
 	"github.com/gopher-market/internal/models"
 	"github.com/gopher-market/internal/storage"
 )
@@ -17,20 +19,22 @@ type Orders interface {
 }
 
 type Balance interface {
-	LoadOrder(orderID string) error
-	GetOrders(userID string) ([]string, error)
+	Withdraw(ctx context.Context, withdrawals models.Withdrawals) error // запрос на списание
+	GetWithdrawals(userID int) ([]models.Withdrawals, error)            // информация о списаниях
+	GetBalance(ctx context.Context, userID string) (models.Balance, error)
 }
 
 type Service struct {
 	Authorization
 	Orders
 	Balance
+	cfg *config.Config
 }
 
-func NewService(repos *storage.Storage) *Service {
+func NewService(repos *storage.Storage, cfg *config.Config) *Service {
 	return &Service{
 		Authorization: NewAuthService(repos.Authorization),
-		Orders:        NewOrderService(repos.Orders),
-		//Balance:       NewBalanceService(repos.Balance),
+		Orders:        NewOrderService(repos.Orders, *cfg),
+		Balance:       NewBalanceService(repos.Balance),
 	}
 }
