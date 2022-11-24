@@ -20,11 +20,10 @@ func NewOrdersPostgres(db *sqlx.DB) *OrdersPostgres {
 }
 
 func (r *OrdersPostgres) SaveAccrual(order models.AccrualOrder) error {
-	query := fmt.Sprintf(`
+	query := `
 UPDATE orders 
 SET status = $1, accrual = $2 
-WHERE order_number = $3`,
-	)
+WHERE order_number = $3`
 	_, err := r.db.Exec(query, order.Status, order.Accrual, order.Order)
 	if err != nil {
 		log.Println("Can't Save accrual: ", err)
@@ -38,7 +37,7 @@ func (r *OrdersPostgres) SaveOrderBalance(ctx context.Context, userID string, cu
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
 
-		return errors.New(fmt.Sprintf("can't start tx; error: %v", err))
+		return fmt.Errorf("can't start tx; error: %v", err)
 	}
 
 	defer func(tx *sqlx.Tx) {
@@ -82,9 +81,9 @@ UPDATE SET user_current=$2;`, userID, current+balance.Current, balance.Withdrawn
 }
 
 func (r *OrdersPostgres) LoadOrder(userID int, orderID string) error {
-	query := fmt.Sprintf(`
+	query := `
 INSERT INTO orders(order_number, user_id, status, accrual) 
-VALUES ($1, $2, $3, $4)`)
+VALUES ($1, $2, $3, $4)`
 	log.Println(query)
 
 	_, err := r.db.Exec(query, orderID, userID, "NEW", "0")
@@ -97,10 +96,10 @@ VALUES ($1, $2, $3, $4)`)
 func (r *OrdersPostgres) GetOrders(userID int) ([]models.Order, error) {
 	var result []models.Order
 	fmt.Println(userID)
-	query := fmt.Sprintf(`
-		SELECT order_number, user_id, status, accrual, uploaded_at 
-		FROM orders
-    	WHERE user_id = $1`)
+	query := `
+SELECT order_number, user_id, status, accrual, uploaded_at 
+FROM orders
+WHERE user_id = $1`
 	if err := r.db.Select(&result, query, strconv.Itoa(userID)); err != nil {
 		return nil, err
 	}

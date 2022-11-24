@@ -13,12 +13,12 @@ import (
 
 func (h *Handler) getUserBalance(c *gin.Context) {
 
-	userId, err := getUserId(c)
+	userID, err := getUserID(c)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-	balance, err := h.services.Balance.GetBalance(context.Background(), strconv.Itoa(userId))
+	balance, err := h.services.Balance.GetBalance(context.Background(), strconv.Itoa(userID))
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -28,7 +28,7 @@ func (h *Handler) getUserBalance(c *gin.Context) {
 
 func (h *Handler) withdraw(c *gin.Context) {
 	withdrawals := models.Withdrawals{}
-	userId, err := getUserId(c)
+	userID, err := getUserID(c)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -45,7 +45,7 @@ func (h *Handler) withdraw(c *gin.Context) {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 	}
 
-	withdrawals.Id = strconv.Itoa(userId)
+	withdrawals.ID = strconv.Itoa(userID)
 
 	err = h.services.Balance.Withdraw(context.Background(), withdrawals)
 	if err != nil {
@@ -56,7 +56,7 @@ func (h *Handler) withdraw(c *gin.Context) {
 }
 
 func (h *Handler) getWithdrawals(c *gin.Context) {
-	userID, err := getUserId(c)
+	userID, err := getUserID(c)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return

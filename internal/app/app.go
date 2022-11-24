@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -58,7 +57,7 @@ func (a *App) startHTTP() {
 
 	var listener net.Listener
 
-	if a.cfg.Listen.Type == config.LISTEN_TYPE_SOCK {
+	if a.cfg.Listen.Type == config.ListenTypeSock {
 		appDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
 		if err != nil {
 			a.logger.Fatal(err)
@@ -74,7 +73,7 @@ func (a *App) startHTTP() {
 	} else {
 		a.logger.Infof("bind application to host and port: %s", a.cfg.Listen.RunAddress)
 		var err error
-		listener, err = net.Listen("tcp", fmt.Sprintf("%s", a.cfg.Listen.RunAddress))
+		listener, err = net.Listen("tcp", a.cfg.Listen.RunAddress)
 		if err != nil {
 			a.logger.Fatal(err)
 		}

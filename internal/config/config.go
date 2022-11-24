@@ -9,7 +9,7 @@ import (
 )
 
 var RunAddress = flag.StringP("a", "a", "127.0.0.1:10000", "help RunAddress for flagname")
-var DatabaseUri = flag.StringP("d", "d", "", "help db for flagname")
+var DatabaseURI = flag.StringP("d", "d", "", "help db for flagname")
 var Accrual = flag.StringP("r", "r", "127.0.0.1:8080", "help message for flagname")
 
 type Config struct {
@@ -53,8 +53,8 @@ func GetConfig() *Config {
 	if instance.Listen.RunAddress == "0.0.0.0:10000" || *RunAddress != "" {
 		instance.Listen.RunAddress = *RunAddress
 	}
-	if instance.Postgres.DSN == "" || *DatabaseUri != "" {
-		instance.Postgres.DSN = *DatabaseUri
+	if instance.Postgres.DSN == "" || *DatabaseURI != "" {
+		instance.Postgres.DSN = *DatabaseURI
 	}
 	if instance.Accrual.Address == "" {
 		instance.Accrual.Address = *Accrual

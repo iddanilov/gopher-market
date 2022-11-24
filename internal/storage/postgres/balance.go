@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"github.com/gopher-market/internal/models"
 	"github.com/jmoiron/sqlx"
@@ -24,7 +23,7 @@ func (r *BalancePostgres) Withdraw(ctx context.Context, withdrawals models.Withd
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
 
-		return errors.New(fmt.Sprintf("can't start tx; error: %v", err))
+		return fmt.Errorf("can't start tx; error: %v", err)
 	}
 
 	defer func(tx *sqlx.Tx) {
@@ -40,21 +39,21 @@ SELECT  user_id, user_current, withdrawn
 FROM balance
 WHERE user_id = $1 FOR UPDATE SKIP LOCKED
 LIMIT 1`,
-		withdrawals.Id); err != nil {
+		withdrawals.ID); err != nil {
 		log.Println(ctx, err.Error())
 		return err
 
 	}
 
 	if balance.Current < withdrawals.Sum {
-		return errors.New(fmt.Sprintf("insufficient funds! on ammount: %v", balance.Current))
+		return fmt.Errorf("insufficient funds! on ammount: %v", balance.Current)
 	}
 
 	_, err = tx.ExecContext(ctx, `
 UPDATE balance 
 SET user_current = $2, withdrawn = $3 
 WHERE user_id = $1`,
-		withdrawals.Id, balance.Current-withdrawals.Sum, balance.Withdrawn+withdrawals.Sum,
+		withdrawals.ID, balance.Current-withdrawals.Sum, balance.Withdrawn+withdrawals.Sum,
 	)
 	if err != nil {
 		{
@@ -71,7 +70,7 @@ WHERE user_id = $1`,
 	_, err = tx.ExecContext(ctx, `
 INSERT INTO withdrawals(user_id, order_number, sum) 
 VALUES ($1, $2, $3)`,
-		withdrawals.Id, withdrawals.Order, withdrawals.Sum,
+		withdrawals.ID, withdrawals.Order, withdrawals.Sum,
 	)
 	if err != nil {
 		{
@@ -101,10 +100,10 @@ VALUES ($1, $2, $3)`,
 
 func (r *BalancePostgres) GetWithdrawals(userID string) ([]models.Withdrawals, error) {
 	var balance []models.Withdrawals
-	query := fmt.Sprintf(`
-		SELECT user_id, order_number, sum, processed_at 
-		FROM withdrawals
-    	WHERE user_id = $1`)
+	query := `
+SELECT user_id, order_number, sum, processed_at 
+FROM withdrawals
+WHERE user_id = $1`
 	if err := r.db.Select(&balance, query, userID); err != nil {
 		return nil, err
 	}

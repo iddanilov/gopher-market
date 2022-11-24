@@ -1,7 +1,6 @@
 package postgres
 
 import (
-	"fmt"
 	"github.com/gopher-market/internal/models"
 	"github.com/jmoiron/sqlx"
 	"log"
@@ -17,7 +16,9 @@ func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
 
 func (r *AuthPostgres) CreateUser(models models.User) (int, error) {
 	var id int
-	query := fmt.Sprintf("INSERT INTO users(login, password_hash) values ($1, $2)")
+	query := `
+INSERT INTO users(login, password_hash)
+VALUES ($1, $2)`
 	log.Println(query)
 	log.Println(models)
 

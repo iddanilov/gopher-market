@@ -7,7 +7,7 @@ import (
 )
 
 func (h *Handler) loadOrder(c *gin.Context) {
-	userID, err := getUserId(c)
+	userID, err := getUserID(c)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -27,7 +27,7 @@ func (h *Handler) loadOrder(c *gin.Context) {
 }
 
 func (h *Handler) getOrders(c *gin.Context) {
-	userID, err := getUserId(c)
+	userID, err := getUserID(c)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
