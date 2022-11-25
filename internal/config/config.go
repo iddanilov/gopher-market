@@ -1,6 +1,7 @@
 package config
 
 import (
+	goflag "flag"
 	"log"
 	"sync"
 
@@ -21,11 +22,7 @@ type Config struct {
 		SocketFile string `env:"SOCKET_FILE " env-default:"app.sock"`
 	}
 	AppConfig struct {
-		LogLevel  string `env:"LOG_LEVEL"`
-		AdminUser struct {
-			Email    string `env:"ADMIN_EMAIL" env-required:"true"`
-			Password string `env:"ADMIN_PWD" env-required:"true"`
-		}
+		LogLevel string `env:"LOG_LEVEL" env-default:"debug"`
 	}
 	Postgres struct {
 		DSN string `env:"DATABASE_URI"`
@@ -48,14 +45,17 @@ func GetConfig() *Config {
 			log.Println(description)
 			log.Fatal(err)
 		}
+		flag.CommandLine.AddGoFlagSet(goflag.CommandLine)
+		flag.Parse()
 	})
 
 	if instance.Listen.RunAddress == "0.0.0.0:10000" || *RunAddress != "" {
 		instance.Listen.RunAddress = *RunAddress
 	}
-	if instance.Postgres.DSN == "" || *DatabaseURI != "" {
+	if instance.Postgres.DSN == "" {
 		instance.Postgres.DSN = *DatabaseURI
 	}
+
 	if instance.Accrual.Address == "" {
 		instance.Accrual.Address = *Accrual
 	}

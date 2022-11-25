@@ -3,6 +3,7 @@ package postgres
 import (
 	"github.com/gopher-market/internal/config"
 	"github.com/jmoiron/sqlx"
+	"log"
 )
 
 func NewPostgresDB(cfg *config.Config) (*sqlx.DB, error) {
@@ -12,6 +13,7 @@ func NewPostgresDB(cfg *config.Config) (*sqlx.DB, error) {
 	}
 
 	err = db.Ping()
+	log.Println(err)
 	if err != nil {
 		return nil, err
 	}
