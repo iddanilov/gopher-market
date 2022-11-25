@@ -9,9 +9,9 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-var RunAddress = flag.StringP("a", "a", "127.0.0.1:10000", "help RunAddress for flagname")
+var RunAddress = flag.StringP("a", "a", "", "help RunAddress for flagname")
 var DatabaseURI = flag.StringP("d", "d", "", "help db for flagname")
-var Accrual = flag.StringP("r", "r", "127.0.0.1:8080", "help message for flagname")
+var Accrual = flag.StringP("r", "r", "", "help message for flagname")
 
 type Config struct {
 	IsDebug       bool `env:"IS_DEBUG" env-default:"false"`
