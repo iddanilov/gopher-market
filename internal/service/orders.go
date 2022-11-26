@@ -44,7 +44,7 @@ func (s *OrderService) writeInfoAboutOrder(userID int, orderID string) {
 	res, err := client.Do(req)
 
 	if res.StatusCode != http.StatusOK {
-		log.Println("ERROR can't save accrual: ", err)
+		return
 	}
 
 	body, err := io.ReadAll(res.Body)
@@ -54,6 +54,7 @@ func (s *OrderService) writeInfoAboutOrder(userID int, orderID string) {
 	if res.StatusCode != http.StatusOK {
 		log.Println("ERROR can't save accrual: ", err)
 	}
+
 	go func() {
 		err = s.repo.SaveAccrual(order)
 		if err != nil {

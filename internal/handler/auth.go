@@ -27,9 +27,7 @@ func (h *Handler) registration(c *gin.Context) {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-
 	c.Header("Authorization", fmt.Sprintf("Bearer %s", token))
-
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"id": id,
 	})

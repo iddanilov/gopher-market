@@ -5,9 +5,6 @@ import (
 	"errors"
 	"net"
 	"net/http"
-	"os"
-	"path"
-	"path/filepath"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -57,26 +54,11 @@ func (a *App) startHTTP() {
 
 	var listener net.Listener
 
-	if a.cfg.Listen.Type == config.ListenTypeSock {
-		appDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
-		if err != nil {
-			a.logger.Fatal(err)
-		}
-		socketPath := path.Join(appDir, a.cfg.Listen.SocketFile)
-		a.logger.Infof("socket path: %s", socketPath)
-
-		a.logger.Info("create and listen unix socket")
-		listener, err = net.Listen("unix", socketPath)
-		if err != nil {
-			a.logger.Fatal(err)
-		}
-	} else {
-		a.logger.Infof("bind application to host and port: %s", a.cfg.Listen.RunAddress)
-		var err error
-		listener, err = net.Listen("tcp", a.cfg.Listen.RunAddress)
-		if err != nil {
-			a.logger.Fatal(err)
-		}
+	a.logger.Infof("bind application to host and port: %s", a.cfg.Listen.RunAddress)
+	var err error
+	listener, err = net.Listen("tcp", a.cfg.Listen.RunAddress)
+	if err != nil {
+		a.logger.Fatal(err)
 	}
 
 	c := cors.New(cors.Options{
@@ -108,7 +90,7 @@ func (a *App) startHTTP() {
 			a.logger.Fatal(err)
 		}
 	}
-	err := a.httpServer.Shutdown(context.Background())
+	err = a.httpServer.Shutdown(context.Background())
 	if err != nil {
 		a.logger.Fatal(err)
 	}
