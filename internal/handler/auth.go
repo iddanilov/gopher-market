@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/gopher-market/internal/models"
 	"net/http"
 
@@ -21,31 +22,39 @@ func (h *Handler) registration(c *gin.Context) {
 		return
 	}
 
+	token, err := h.getAuthToken(input.Login, input.Password)
+	if err != nil {
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.Header("Authorization", fmt.Sprintf("Bearer %s", token))
+
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"id": id,
 	})
 }
 
-type signInInput struct {
-	Login    string `json:"login" binding:"required"`
-	Password string `json:"password" binding:"required"`
-}
-
 func (h *Handler) login(c *gin.Context) {
-	var input signInInput
+	var input models.User
 
 	if err := c.BindJSON(&input); err != nil {
 		//newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	token, err := h.services.Authorization.GenerateToken(input.Login, input.Password)
+	token, err := h.getAuthToken(input.Login, input.Password)
 	if err != nil {
-		//newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
+	c.Header("Authorization", fmt.Sprintf("Bearer %s", token))
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"token": token,
 	})
+}
+
+func (h *Handler) getAuthToken(login, password string) (string, error) {
+	return h.services.Authorization.GenerateToken(login, password)
 }
