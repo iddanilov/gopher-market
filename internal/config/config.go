@@ -18,7 +18,7 @@ type Config struct {
 	IsDevelopment bool `env:"IS_DEV" env-default:"false"`
 	Listen        struct {
 		Type       string `env:"LISTEN_TYPE" env-default:"port" env-description:"port or sock"`
-		RunAddress string `env:"RUN_ADDRESS" env-default:"0.0.0.0:10000"`
+		RunAddress string `env:"RUN_ADDRESS" env-default:""`
 		SocketFile string `env:"SOCKET_FILE " env-default:"app.sock"`
 	}
 	AppConfig struct {
@@ -49,7 +49,7 @@ func GetConfig() *Config {
 		flag.Parse()
 	})
 
-	if instance.Listen.RunAddress == "0.0.0.0:10000" || *RunAddress != "" {
+	if instance.Listen.RunAddress == "" {
 		instance.Listen.RunAddress = *RunAddress
 	}
 	if instance.Postgres.DSN == "" {
