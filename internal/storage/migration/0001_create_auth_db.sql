@@ -1,9 +1,7 @@
-CREATE TABLE user
+CREATE TABLE users
 (
-    id           BIGSERIAL PRIMARY KEY NOT NULL,
-    name         VARCHAR(64) NOT NULL,
-    email        VARCHAR(64) NOT NULL,
-    password     VARCHAR(64),
-    registeredAt TIMESTAMP DEFAULT now(),
-    lastVisitAt  TIMESTAMP
+    id            serial       not null unique,
+    login         varchar(255) not null unique,
+    password_hash varchar(255) not null
 );
+

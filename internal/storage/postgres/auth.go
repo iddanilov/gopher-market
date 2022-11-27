@@ -41,7 +41,7 @@ VALUES ($1, $2)`
 
 	_, err = r.db.Exec(query, models.Login, models.Password)
 	if err != nil {
-		log.Println("Can't Update Metric: ", err)
+		log.Println("can't registered user: ", err)
 	}
 
 	return id, nil

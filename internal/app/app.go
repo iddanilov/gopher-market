@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"net"
 	"net/http"
 	"time"
@@ -29,9 +30,29 @@ type App struct {
 }
 
 func NewApp(cfg *config.Config, logger *logging.Logger) (App, error) {
+	ctx := context.Background()
 	db, err := postgres.NewPostgresDB(cfg)
 	if err != nil {
 		logrus.Fatalf("failed to initialize db: %s", err.Error())
+	}
+	// migrations
+	m := postgres.NewMigrationsPostgres(db)
+	err = m.CreateUserTable(ctx)
+	if err != nil {
+		log.Println(err)
+	}
+	err = m.CreateOrdersTable(ctx)
+	if err != nil {
+		log.Println(err)
+	}
+	err = m.CreateBalanceTable(ctx)
+	if err != nil {
+		log.Println(err)
+	}
+	err = m.CreateWithdrawalsTable(ctx)
+
+	if err != nil {
+		log.Println(err)
 	}
 
 	logger.Println("router initializing")
