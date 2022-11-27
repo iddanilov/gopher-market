@@ -28,7 +28,7 @@ func (r *AuthPostgres) CreateUser(models models.User) (int, error) {
 		return 0, errors.New("user already registered")
 	}
 	query = `
-INSERT INTO users(login, passwordHash)
+INSERT INTO users(login, password_hash)
 VALUES ($1, $2)`
 	log.Println(query)
 	log.Println(models)
