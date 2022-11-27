@@ -18,7 +18,7 @@ func (h *Handler) registration(c *gin.Context) {
 
 	id, err := h.services.Authorization.CreateUser(input)
 	if err != nil {
-		if err.Error() != "user already registered" {
+		if err.Error() == "user already registered" {
 			authUserAlreadyRegisteredErrorResponse(c, err.Error())
 		} else {
 			newErrorResponse(c, http.StatusInternalServerError, err.Error())

@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"database/sql"
 	"errors"
 	"github.com/gopher-market/internal/models"
 	"github.com/jmoiron/sqlx"
@@ -21,12 +22,17 @@ func (r *AuthPostgres) CreateUser(models models.User) (int, error) {
 	query := "SELECT password_hash FROM users WHERE login=$1"
 	err := r.db.Get(&passwordHash, query, models.Login)
 	if err != nil {
-		log.Println("can't registered user: ", err)
-		return 0, errors.New("can't registered user: ")
+		if err != sql.ErrNoRows {
+			log.Println("can't registered user: ", err)
+			return 0, errors.New("can't registered user")
+		}
+	} else {
+		if passwordHash != models.Password {
+			log.Println("user already registered: ", err)
+			return 0, errors.New("user already registered")
+		}
 	}
-	if passwordHash != models.Password {
-		return 0, errors.New("user already registered")
-	}
+
 	query = `
 INSERT INTO users(login, password_hash)
 VALUES ($1, $2)`
