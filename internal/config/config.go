@@ -9,7 +9,7 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
-var RunAddress = flag.StringP("a", "a", "", "help RunAddress for flagname")
+var RunAddress = flag.StringP("a", "a", "localhost:8080", "help RunAddress for flagname")
 var DatabaseURI = flag.StringP("d", "d", "", "help db for flagname")
 var Accrual = flag.StringP("r", "r", "", "help message for flagname")
 

@@ -63,7 +63,7 @@ func (a *App) startHTTP() {
 
 	c := cors.New(cors.Options{
 		AllowedMethods:     []string{http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodPut, http.MethodOptions, http.MethodDelete},
-		AllowedOrigins:     []string{"http://localhost:3000", "http://localhost:8080"},
+		AllowedOrigins:     []string{"http://localhost:3000", "http://localhost:8080", a.cfg.Listen.RunAddress},
 		AllowCredentials:   true,
 		AllowedHeaders:     []string{"Location", "Charset", "Access-Control-Allow-Origin", "Content-Type", "content-type", "Origin", "Accept", "Content-Length", "Accept-Encoding", "X-CSRF-Token"},
 		OptionsPassthrough: true,
