@@ -17,18 +17,18 @@ func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
 
 func (r *AuthPostgres) CreateUser(models models.User) (int, error) {
 	var id int
-	var password_hash string
+	var passwordHash string
 	query := "SELECT password_hash FROM users WHERE login=$1"
-	err := r.db.Get(&password_hash, query, models.Login)
+	err := r.db.Get(&passwordHash, query, models.Login)
 	if err != nil {
 		log.Println("can't registered user: ", err)
 		return 0, errors.New("can't registered user: ")
 	}
-	if password_hash != models.Password {
+	if passwordHash != models.Password {
 		return 0, errors.New("user already registered")
 	}
 	query = `
-INSERT INTO users(login, password_hash)
+INSERT INTO users(login, passwordHash)
 VALUES ($1, $2)`
 	log.Println(query)
 	log.Println(models)
