@@ -1,6 +1,7 @@
 package postgres
 
 import (
+	"errors"
 	"github.com/gopher-market/internal/models"
 	"github.com/jmoiron/sqlx"
 	"log"
@@ -16,13 +17,23 @@ func NewAuthPostgres(db *sqlx.DB) *AuthPostgres {
 
 func (r *AuthPostgres) CreateUser(models models.User) (int, error) {
 	var id int
-	query := `
+	var password_hash string
+	query := "SELECT password_hash FROM users WHERE login=$1"
+	err := r.db.Get(&password_hash, query, models.Login)
+	if err != nil {
+		log.Println("can't registered user: ", err)
+		return 0, errors.New("can't registered user: ")
+	}
+	if password_hash != models.Password {
+		return 0, errors.New("user already registered")
+	}
+	query = `
 INSERT INTO users(login, password_hash)
 VALUES ($1, $2)`
 	log.Println(query)
 	log.Println(models)
 
-	_, err := r.db.Exec(query, models.Login, models.Password)
+	_, err = r.db.Exec(query, models.Login, models.Password)
 	if err != nil {
 		log.Println("Can't Update Metric: ", err)
 	}

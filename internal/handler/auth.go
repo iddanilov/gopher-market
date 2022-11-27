@@ -18,13 +18,17 @@ func (h *Handler) registration(c *gin.Context) {
 
 	id, err := h.services.Authorization.CreateUser(input)
 	if err != nil {
-		//newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		if err.Error() != "user already registered" {
+			authUserAlreadyRegisteredErrorResponse(c, err.Error())
+		} else {
+			newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		}
 		return
 	}
 
 	token, err := h.getAuthToken(input.Login, input.Password)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		authErrorResponse(c, err.Error())
 		return
 	}
 	c.Header("Authorization", fmt.Sprintf("Bearer %s", token))
@@ -43,7 +47,7 @@ func (h *Handler) login(c *gin.Context) {
 
 	token, err := h.getAuthToken(input.Login, input.Password)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		authErrorResponse(c, err.Error())
 		return
 	}
 
