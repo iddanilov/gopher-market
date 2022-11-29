@@ -31,7 +31,7 @@ func (s *OrderService) LoadOrder(userID int, orderID string) error {
 	return nil
 }
 
-func (s *OrderService) GetOrders(userID int) ([]models.Order, error) {
+func (s *OrderService) GetOrders(userID int) (*[]models.Order, error) {
 	return s.repo.GetOrders(userID)
 }
 
@@ -51,7 +51,7 @@ func (s *OrderService) writeInfoAboutOrder(userID int, orderID string) {
 	defer res.Body.Close()
 
 	err = json.Unmarshal(body, &order)
-	if res.StatusCode != http.StatusOK {
+	if err != nil {
 		log.Println("ERROR can't save accrual: ", err)
 	}
 

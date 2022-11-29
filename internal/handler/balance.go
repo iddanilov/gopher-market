@@ -12,10 +12,9 @@ import (
 )
 
 func (h *Handler) getUserBalance(c *gin.Context) {
-
 	userID, err := getUserID(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		authErrorResponse(c, err.Error())
 		return
 	}
 	balance, err := h.services.Balance.GetBalance(context.Background(), strconv.Itoa(userID))
@@ -30,7 +29,7 @@ func (h *Handler) withdraw(c *gin.Context) {
 	withdrawals := models.Withdrawals{}
 	userID, err := getUserID(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		authErrorResponse(c, err.Error())
 		return
 	}
 
@@ -58,7 +57,7 @@ func (h *Handler) withdraw(c *gin.Context) {
 func (h *Handler) getWithdrawals(c *gin.Context) {
 	userID, err := getUserID(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		authErrorResponse(c, err.Error())
 		return
 	}
 

@@ -16,7 +16,7 @@ type Authorization interface {
 type Orders interface {
 	LoadOrder(userID int, orderID string) error
 	SaveAccrual(order models.AccrualOrder) error
-	GetOrders(userID int) ([]models.Order, error)
+	GetOrders(userID int) (*[]models.Order, error)
 	SaveOrderBalance(ctx context.Context, userID string, current int) error
 }
 

@@ -19,17 +19,20 @@ func (h *Handler) loadOrder(c *gin.Context) {
 	}
 	err = h.services.Orders.LoadOrder(userID, string(responseData))
 	if err != nil {
+		if err.Error() == "pq: duplicate key value violates unique constraint \"orders_pkey\"" {
+			c.JSON(http.StatusOK, err)
+		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusOK, err)
+	c.JSON(http.StatusAccepted, err)
 }
 
 func (h *Handler) getOrders(c *gin.Context) {
 	userID, err := getUserID(c)
 	if err != nil {
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		authErrorResponse(c, err.Error())
 		return
 	}
 
@@ -38,6 +41,10 @@ func (h *Handler) getOrders(c *gin.Context) {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
-
+	if len(*orders) <= 0 {
+		c.JSON(http.StatusNoContent, nil)
+		return
+	}
 	c.JSON(http.StatusOK, orders)
+
 }

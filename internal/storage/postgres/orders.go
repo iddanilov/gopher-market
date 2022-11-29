@@ -84,18 +84,17 @@ func (r *OrdersPostgres) LoadOrder(userID int, orderID string) error {
 	query := `
 INSERT INTO orders(order_number, user_id, status, accrual) 
 VALUES ($1, $2, $3, $4)`
-	log.Println(query)
 
 	_, err := r.db.Exec(query, orderID, userID, "NEW", "0")
 	if err != nil {
 		log.Println("Can't Update Order: ", err)
+		return err
 	}
 	return nil
 }
 
-func (r *OrdersPostgres) GetOrders(userID int) ([]models.Order, error) {
+func (r *OrdersPostgres) GetOrders(userID int) (*[]models.Order, error) {
 	var result []models.Order
-	fmt.Println(userID)
 	query := `
 SELECT order_number, user_id, status, accrual, uploaded_at 
 FROM orders
@@ -103,7 +102,5 @@ WHERE user_id = $1`
 	if err := r.db.Select(&result, query, strconv.Itoa(userID)); err != nil {
 		return nil, err
 	}
-	fmt.Println(result)
-	return result, nil
-
+	return &result, nil
 }
