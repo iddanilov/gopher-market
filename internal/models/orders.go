@@ -13,6 +13,6 @@ type Order struct {
 type AccrualOrder struct {
 	Order      string     `json:"order" db:"order_number" binding:"required"`
 	Status     string     `json:"status" db:"status" binding:"required"`
-	Accrual    int        `json:"accrual,omitempty" db:"accrual" `
+	Accrual    float32    `json:"accrual,omitempty" db:"accrual" `
 	UploadedAt *time.Time `json:"uploaded_at" db:"uploaded_at"`
 }

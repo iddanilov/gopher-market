@@ -31,7 +31,7 @@ WHERE order_number = $3`
 	return err
 }
 
-func (r *OrdersPostgres) SaveOrderBalance(ctx context.Context, userID string, current int) error {
+func (r *OrdersPostgres) SaveOrderBalance(ctx context.Context, userID string, current float32) error {
 	var balance models.Balance
 
 	tx, err := r.db.BeginTxx(ctx, nil)

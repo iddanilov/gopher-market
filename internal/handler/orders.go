@@ -20,13 +20,14 @@ func (h *Handler) loadOrder(c *gin.Context) {
 	err = h.services.Orders.LoadOrder(userID, string(responseData))
 	if err != nil {
 		if err.Error() == "pq: duplicate key value violates unique constraint \"orders_pkey\"" {
-			c.JSON(http.StatusOK, err)
+			c.JSON(http.StatusOK, nil)
+			return
 		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusAccepted, err)
+	c.JSON(http.StatusAccepted, nil)
 }
 
 func (h *Handler) getOrders(c *gin.Context) {

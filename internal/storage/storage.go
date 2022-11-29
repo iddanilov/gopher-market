@@ -17,7 +17,7 @@ type Orders interface {
 	LoadOrder(userID int, orderID string) error
 	SaveAccrual(order models.AccrualOrder) error
 	GetOrders(userID int) (*[]models.Order, error)
-	SaveOrderBalance(ctx context.Context, userID string, current int) error
+	SaveOrderBalance(ctx context.Context, userID string, current float32) error
 }
 
 type Balance interface {

@@ -58,7 +58,7 @@ CREATE TABLE orders
     order_number VARCHAR(64) PRIMARY KEY NOT NULL,
     user_id      VARCHAR(64)             NOT NULL,
     status       VARCHAR(64)             NOT NULL,
-    accrual      VARCHAR(64)             NOT NULL,
+    accrual      NUMERIC                 NOT NULL,
     uploaded_at  TIMESTAMP DEFAULT now()
 );`,
 			)
@@ -90,8 +90,8 @@ select * from balance;`,
 CREATE TABLE balance
 (
     user_id      VARCHAR(64) PRIMARY KEY NOT NULL,
-    user_current INT                     NOT NULL,
-    withdrawn    INT                     NOT NULL
+    user_current NUMERIC	NOT NULL,
+    withdrawn    NUMERIC	NOT NULL
 );`,
 			)
 			if err != nil {
@@ -121,10 +121,10 @@ select * from withdrawals;`,
 			_, err = m.db.ExecContext(ctx, `
 CREATE TABLE withdrawals
 (
-    user_id INT PRIMARY KEY NOT NULL,
-    order_number   VARCHAR(64)     NOT NULL,
-    sum     VARCHAR(64)     NOT NULL,
-    processed_at TIMESTAMP DEFAULT now()
+    user_id 		INT PRIMARY KEY NOT NULL,
+    order_number   	VARCHAR(64)     NOT NULL,
+    sum     		NUMERIC     NOT NULL,
+    processed_at 	TIMESTAMP DEFAULT now()
 );`,
 			)
 			if err != nil {
