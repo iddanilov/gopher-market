@@ -22,15 +22,12 @@ func (r *BalancePostgres) Withdraw(ctx context.Context, withdrawals models.Withd
 
 	tx, err := r.db.BeginTxx(ctx, nil)
 	if err != nil {
-
 		return fmt.Errorf("can't start tx; error: %v", err)
 	}
 
 	defer func(tx *sqlx.Tx) {
 		if err := tx.Rollback(); err != nil {
-			if err != sql.ErrTxDone {
-				log.Println(ctx, err.Error())
-			}
+			log.Println(ctx, err.Error())
 		}
 	}(tx)
 
@@ -40,9 +37,10 @@ FROM balance
 WHERE user_id = $1 FOR UPDATE SKIP LOCKED
 LIMIT 1`,
 		withdrawals.ID); err != nil {
-		log.Println(ctx, err.Error())
-		return err
-
+		if err != sql.ErrNoRows {
+			log.Println(ctx, err.Error())
+			return err
+		}
 	}
 
 	if balance.Current < withdrawals.Sum {
@@ -53,7 +51,7 @@ LIMIT 1`,
 UPDATE balance 
 SET user_current = $2, withdrawn = $3 
 WHERE user_id = $1`,
-		withdrawals.ID, balance.Current-withdrawals.Sum, balance.Withdrawn+withdrawals.Sum,
+		withdrawals.ID, (balance.Current*100+withdrawals.Sum*100)/100, (balance.Withdrawn*100+withdrawals.Sum*100)/100,
 	)
 	if err != nil {
 		{

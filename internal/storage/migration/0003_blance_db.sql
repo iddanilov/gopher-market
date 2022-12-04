@@ -8,9 +8,9 @@ CREATE TABLE balance
 
 CREATE TABLE withdrawals
 (
-    user_id INT PRIMARY KEY NOT NULL,
-    order_number   VARCHAR(64)     NOT NULL,
-    sum     VARCHAR(64)     NOT NULL,
+    order_number VARCHAR(64) PRIMARY KEY NOT NULL,
+    user_id      INT                     NOT NULL,
+    sum          VARCHAR(64)             NOT NULL,
     processed_at TIMESTAMP DEFAULT now()
 );
 

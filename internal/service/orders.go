@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gopher-market/internal/config"
 	"github.com/gopher-market/internal/models"
@@ -23,7 +25,18 @@ func NewOrderService(repo storage.Orders, cfg config.Config) *OrderService {
 }
 
 func (s *OrderService) LoadOrder(userID int, orderID string) error {
-	err := s.repo.LoadOrder(userID, orderID)
+	ctx := context.Background()
+	order, err := s.repo.GetOrderByUserID(ctx, userID, orderID)
+	if err != nil {
+		if !errors.Is(err, sql.ErrNoRows) {
+			return err
+		}
+	}
+	if order != nil {
+		return errors.New("order already loaded")
+	}
+
+	err = s.repo.LoadOrder(userID, orderID)
 	if err != nil {
 		return err
 	}

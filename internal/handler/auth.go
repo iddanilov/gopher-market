@@ -41,13 +41,13 @@ func (h *Handler) login(c *gin.Context) {
 	var input models.User
 
 	if err := c.BindJSON(&input); err != nil {
-		//newErrorResponse(c, http.StatusBadRequest, err.Error())
+		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	token, err := h.getAuthToken(input.Login, input.Password)
 	if err != nil {
-		authErrorResponse(c, err.Error())
+		authErrorResponse(c, "")
 		return
 	}
 
