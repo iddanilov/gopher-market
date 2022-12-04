@@ -74,12 +74,11 @@ func (s *OrderService) writeInfoAboutOrder(userID int, orderID string) {
 			log.Println("ERROR can't save accrual: ", err)
 		}
 	}()
-	accrual, err := strconv.ParseFloat(order.Accrual, 32)
 	if err != nil {
 		log.Println("ERROR can't save accrual: ", err)
 	}
 	go func() {
-		err = s.repo.SaveOrderBalance(ctx, strconv.Itoa(userID), float32(accrual))
+		err = s.repo.SaveOrderBalance(ctx, strconv.Itoa(userID), order.Accrual)
 		if err != nil {
 			log.Println("ERROR can't save accrual: ", err)
 		}

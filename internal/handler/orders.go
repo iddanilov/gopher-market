@@ -24,6 +24,7 @@ func (h *Handler) loadOrder(c *gin.Context) {
 	}
 	if !valid(orderInt) {
 		newErrorResponse(c, http.StatusUnprocessableEntity, "")
+		return
 	}
 	err = h.services.Orders.LoadOrder(userID, string(responseData))
 	if err != nil {
