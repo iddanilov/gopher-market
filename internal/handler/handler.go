@@ -39,8 +39,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		{
 			balance.GET("/", h.getUserBalance)
 			balance.POST("/withdraw", h.withdraw)
-			balance.GET("/withdrawals", h.getWithdrawals)
 		}
+		balance.GET("/withdrawals", h.getWithdrawals)
 	}
 
 	return router
