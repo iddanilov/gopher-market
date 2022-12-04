@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"net/http"
+	"strconv"
 )
 
 func (h *Handler) loadOrder(c *gin.Context) {
@@ -17,13 +18,21 @@ func (h *Handler) loadOrder(c *gin.Context) {
 		newErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
 	}
+	orderInt, err := strconv.Atoi(string(responseData))
+	if err != nil {
+		newErrorResponse(c, http.StatusUnprocessableEntity, "")
+	}
+	if !valid(orderInt) {
+		newErrorResponse(c, http.StatusUnprocessableEntity, "")
+	}
 	err = h.services.Orders.LoadOrder(userID, string(responseData))
 	if err != nil {
 		if err.Error() == "pq: duplicate key value violates unique constraint \"orders_pkey\"" {
-			c.JSON(http.StatusOK, nil)
+			c.JSON(http.StatusConflict, nil)
 			return
 		} else if err.Error() == "order already loaded" {
 			c.JSON(http.StatusConflict, nil)
+			return
 		}
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
@@ -50,4 +59,27 @@ func (h *Handler) getOrders(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, orders)
 
+}
+
+func valid(number int) bool {
+	return (number%10+checksum(number/10))%10 == 0
+}
+
+func checksum(number int) int {
+	var luhn int
+
+	for i := 0; number > 0; i++ {
+		cur := number % 10
+
+		if i%2 == 0 { // even
+			cur = cur * 2
+			if cur > 9 {
+				cur = cur%10 + cur/10
+			}
+		}
+
+		luhn += cur
+		number = number / 10
+	}
+	return luhn % 10
 }
