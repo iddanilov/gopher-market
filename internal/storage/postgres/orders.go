@@ -66,7 +66,7 @@ INSERT INTO balance (user_id, user_current, withdrawn)
 VALUES($1, $2, $3)
     ON CONFLICT (user_id)
 DO
-UPDATE SET user_current=$2;`, userID, (current*100+balance.Current*100)/100, balance.Withdrawn)
+UPDATE SET user_current=$2;`, userID, current+balance.Current, balance.Withdrawn)
 	if err != nil {
 		log.Println(ctx, err.Error())
 		return err
@@ -93,17 +93,17 @@ VALUES ($1, $2, $3, $4)`
 	return nil
 }
 
-func (r *OrdersPostgres) GetOrderByUserID(ctx context.Context, userID int, orderID string) (*models.Order, error) {
+func (r *OrdersPostgres) GetOrderByUserID(ctx context.Context, orderID string) (*models.Order, error) {
 	var result models.Order
 	query := `
 SELECT order_number, user_id, status, accrual, uploaded_at
 FROM orders
-WHERE user_id = $1 AND order_number =$2
+WHERE order_number =$1
 LIMIT 1`
-	if err := r.db.GetContext(ctx, &result, query, strconv.Itoa(userID), orderID); err != nil {
+	if err := r.db.GetContext(ctx, &result, query, orderID); err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return &result, nil
 }
 
 func (r *OrdersPostgres) GetOrders(userID int) (*[]models.Order, error) {

@@ -26,7 +26,7 @@ func NewOrderService(repo storage.Orders, cfg config.Config) *OrderService {
 
 func (s *OrderService) LoadOrder(userID int, orderID string) (int, error) {
 	ctx := context.Background()
-	order, err := s.repo.GetOrderByUserID(ctx, userID, orderID)
+	order, err := s.repo.GetOrderByUserID(ctx, orderID)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			return http.StatusInternalServerError, err

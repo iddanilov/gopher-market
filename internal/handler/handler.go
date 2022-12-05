@@ -40,7 +40,10 @@ func (h *Handler) InitRoutes() *gin.Engine {
 			balance.GET("/", h.getUserBalance)
 			balance.POST("/withdraw", h.withdraw)
 		}
-		user.GET("/withdrawals", h.getWithdrawals)
+		withdrawals := user.Group("/withdrawals", h.userIdentity)
+		{
+			withdrawals.GET("/", h.getWithdrawals)
+		}
 	}
 
 	return router
