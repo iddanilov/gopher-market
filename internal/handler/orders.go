@@ -26,17 +26,13 @@ func (h *Handler) loadOrder(c *gin.Context) {
 		newErrorResponse(c, http.StatusUnprocessableEntity, "")
 		return
 	}
-	err = h.services.Orders.LoadOrder(userID, string(responseData))
+	status, err := h.services.Orders.LoadOrder(userID, string(responseData))
 	if err != nil {
-		if err.Error() == "order already loaded" {
-			c.JSON(http.StatusConflict, nil)
-			return
-		}
-		newErrorResponse(c, http.StatusInternalServerError, err.Error())
+		newErrorResponse(c, status, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusAccepted, nil)
+	c.JSON(status, nil)
 }
 
 func (h *Handler) getOrders(c *gin.Context) {

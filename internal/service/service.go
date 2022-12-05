@@ -14,7 +14,7 @@ type Authorization interface {
 }
 
 type Orders interface {
-	LoadOrder(userID int, orderID string) error
+	LoadOrder(userID int, orderID string) (int, error)
 	GetOrders(userID int) (*[]models.Order, error)
 }
 

@@ -24,27 +24,27 @@ func NewOrderService(repo storage.Orders, cfg config.Config) *OrderService {
 	return &OrderService{repo: repo, cfg: cfg}
 }
 
-func (s *OrderService) LoadOrder(userID int, orderID string) error {
+func (s *OrderService) LoadOrder(userID int, orderID string) (int, error) {
 	ctx := context.Background()
 	order, err := s.repo.GetOrderByUserID(ctx, userID, orderID)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
-			return err
+			return http.StatusInternalServerError, err
 		}
 	}
 	if order != nil {
 		if order.ID != userID {
-			return errors.New("order already loaded")
+			return http.StatusConflict, errors.New("order already loaded")
 		}
-		return nil
+		return http.StatusOK, nil
 	}
 
 	err = s.repo.LoadOrder(userID, orderID)
 	if err != nil {
-		return err
+		return http.StatusInternalServerError, err
 	}
 	go s.writeInfoAboutOrder(userID, orderID)
-	return nil
+	return http.StatusAccepted, nil
 }
 
 func (s *OrderService) GetOrders(userID int) (*[]models.Order, error) {
