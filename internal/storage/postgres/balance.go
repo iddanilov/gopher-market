@@ -51,7 +51,7 @@ LIMIT 1`,
 UPDATE balance 
 SET user_current = $2, withdrawn = $3 
 WHERE user_id = $1`,
-		withdrawals.ID, balance.Current+withdrawals.Sum, balance.Withdrawn+withdrawals.Sum,
+		withdrawals.ID, balance.Current-withdrawals.Sum, balance.Withdrawn+withdrawals.Sum,
 	)
 	if err != nil {
 		{

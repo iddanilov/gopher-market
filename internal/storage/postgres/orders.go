@@ -62,11 +62,11 @@ LIMIT 1`,
 	}
 
 	_, err = tx.ExecContext(ctx, `
-INSERT INTO balance (user_id, user_current, withdrawn)
-VALUES($1, $2, $3)
+INSERT INTO balance (user_id, user_current)
+VALUES($1, $2)
     ON CONFLICT (user_id)
 DO
-UPDATE SET user_current=$2;`, userID, current+balance.Current, balance.Withdrawn)
+UPDATE SET user_current=$2;`, userID, current+balance.Current)
 	if err != nil {
 		log.Println(ctx, err.Error())
 		return err
