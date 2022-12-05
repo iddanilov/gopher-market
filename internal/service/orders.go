@@ -33,7 +33,10 @@ func (s *OrderService) LoadOrder(userID int, orderID string) error {
 		}
 	}
 	if order != nil {
-		return errors.New("order already loaded")
+		if order.ID != userID {
+			return errors.New("order already loaded")
+		}
+		return nil
 	}
 
 	err = s.repo.LoadOrder(userID, orderID)
