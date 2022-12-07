@@ -9,6 +9,7 @@ import (
 	"github.com/gopher-market/internal/config"
 	"github.com/gopher-market/internal/models"
 	"github.com/gopher-market/internal/storage"
+	"github.com/gopher-market/pkg/logging"
 	"io"
 	"log"
 	"net/http"
@@ -16,17 +17,18 @@ import (
 )
 
 type OrderService struct {
-	repo storage.Orders
-	cfg  config.Config
+	ctx    context.Context
+	repo   storage.Orders
+	cfg    config.Config
+	logger *logging.Logger
 }
 
-func NewOrderService(repo storage.Orders, cfg config.Config) *OrderService {
-	return &OrderService{repo: repo, cfg: cfg}
+func NewOrderService(ctx context.Context, repo storage.Orders, cfg config.Config, logger *logging.Logger) *OrderService {
+	return &OrderService{ctx: ctx, repo: repo, cfg: cfg, logger: logger}
 }
 
 func (s *OrderService) LoadOrder(userID int, orderID string) (int, error) {
-	ctx := context.Background()
-	order, err := s.repo.GetOrderByUserID(ctx, orderID)
+	order, err := s.repo.GetOrderByUserID(s.ctx, orderID)
 	if err != nil {
 		if !errors.Is(err, sql.ErrNoRows) {
 			return http.StatusInternalServerError, err
@@ -52,7 +54,6 @@ func (s *OrderService) GetOrders(userID int) (*[]models.Order, error) {
 }
 
 func (s *OrderService) writeInfoAboutOrder(userID int, orderID string) {
-	ctx := context.Background()
 	client := &http.Client{}
 
 	order := models.AccrualOrder{}
@@ -68,20 +69,22 @@ func (s *OrderService) writeInfoAboutOrder(userID int, orderID string) {
 
 	err = json.Unmarshal(body, &order)
 	if err != nil {
-		log.Println("ERROR can't save accrual: ", err)
+		s.logger.Error("ERROR can't save accrual: ", err)
+		return
 	}
 
 	go func() {
 		err = s.repo.SaveAccrual(order)
 		if err != nil {
 			log.Println("ERROR can't save accrual: ", err)
+			return
 		}
 	}()
 	if err != nil {
 		log.Println("ERROR can't save accrual: ", err)
 	}
 	go func() {
-		err = s.repo.SaveOrderBalance(ctx, strconv.Itoa(userID), order.Accrual)
+		err = s.repo.SaveOrderBalance(strconv.Itoa(userID), order.Accrual)
 		if err != nil {
 			log.Println("ERROR can't save accrual: ", err)
 		}

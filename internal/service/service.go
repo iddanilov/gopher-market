@@ -5,6 +5,7 @@ import (
 	"github.com/gopher-market/internal/config"
 	"github.com/gopher-market/internal/models"
 	"github.com/gopher-market/internal/storage"
+	"github.com/gopher-market/pkg/logging"
 )
 
 type Authorization interface {
@@ -19,22 +20,23 @@ type Orders interface {
 }
 
 type Balance interface {
-	Withdraw(ctx context.Context, withdrawals models.Withdrawals) error // запрос на списание
-	GetWithdrawals(userID int) ([]models.Withdrawals, error)            // информация о списаниях
-	GetBalance(ctx context.Context, userID string) (models.Balance, error)
+	Withdraw(withdrawals models.Withdrawals) error           // запрос на списание
+	GetWithdrawals(userID int) ([]models.Withdrawals, error) // информация о списаниях
+	GetBalance(userID string) (models.Balance, error)
 }
 
 type Service struct {
 	Authorization
 	Orders
 	Balance
-	cfg *config.Config
+	cfg    *config.Config
+	logger *logging.Logger
 }
 
-func NewService(repos *storage.Storage, cfg *config.Config) *Service {
+func NewService(ctx context.Context, repos *storage.Storage, cfg *config.Config, logger *logging.Logger) *Service {
 	return &Service{
-		Authorization: NewAuthService(repos.Authorization),
-		Orders:        NewOrderService(repos.Orders, *cfg),
-		Balance:       NewBalanceService(repos.Balance),
+		Authorization: NewAuthService(ctx, repos.Authorization, logger),
+		Orders:        NewOrderService(ctx, repos.Orders, *cfg, logger),
+		Balance:       NewBalanceService(ctx, repos.Balance, logger),
 	}
 }

@@ -2,6 +2,7 @@ package storage
 
 import (
 	"context"
+	"github.com/gopher-market/pkg/logging"
 	"github.com/jmoiron/sqlx"
 
 	"github.com/gopher-market/internal/models"
@@ -18,25 +19,26 @@ type Orders interface {
 	SaveAccrual(order models.AccrualOrder) error
 	GetOrderByUserID(ctx context.Context, orderID string) (*models.Order, error)
 	GetOrders(userID int) (*[]models.Order, error)
-	SaveOrderBalance(ctx context.Context, userID string, current float32) error
+	SaveOrderBalance(userID string, current float32) error
 }
 
 type Balance interface {
-	GetBalance(ctx context.Context, userID string) (models.Balance, error)
-	Withdraw(ctx context.Context, withdrawals models.Withdrawals) error // запрос на списание
-	GetWithdrawals(userID string) ([]models.Withdrawals, error)         // информация о списаниях
+	GetBalance(userID string) (models.Balance, error)
+	Withdraw(withdrawals models.Withdrawals) error              // запрос на списание
+	GetWithdrawals(userID string) ([]models.Withdrawals, error) // информация о списаниях
 }
 
 type Storage struct {
+	logger *logging.Logger
 	Authorization
 	Orders
 	Balance
 }
 
-func NewStorage(db *sqlx.DB) *Storage {
+func NewStorage(ctx context.Context, db *sqlx.DB, logger *logging.Logger) *Storage {
 	return &Storage{
-		Authorization: postgres.NewAuthPostgres(db),
-		Orders:        postgres.NewOrdersPostgres(db),
-		Balance:       postgres.NewBalancePostgres(db),
+		Authorization: postgres.NewAuthPostgres(ctx, db, logger),
+		Orders:        postgres.NewOrdersPostgres(ctx, db, logger),
+		Balance:       postgres.NewBalancePostgres(ctx, db, logger),
 	}
 }

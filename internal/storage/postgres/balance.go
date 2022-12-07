@@ -4,41 +4,44 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/gopher-market/internal/models"
 	"github.com/jmoiron/sqlx"
-	"log"
+
+	"github.com/gopher-market/internal/models"
+	"github.com/gopher-market/pkg/logging"
 )
 
 type BalancePostgres struct {
-	db *sqlx.DB
+	ctx    context.Context
+	db     *sqlx.DB
+	logger *logging.Logger
 }
 
-func NewBalancePostgres(db *sqlx.DB) *BalancePostgres {
-	return &BalancePostgres{db: db}
+func NewBalancePostgres(ctx context.Context, db *sqlx.DB, logger *logging.Logger) *BalancePostgres {
+	return &BalancePostgres{ctx: ctx, db: db, logger: logger}
 }
 
-func (r *BalancePostgres) Withdraw(ctx context.Context, withdrawals models.Withdrawals) error {
+func (r *BalancePostgres) Withdraw(withdrawals models.Withdrawals) error {
 	var balance models.Balance
 
-	tx, err := r.db.BeginTxx(ctx, nil)
+	tx, err := r.db.BeginTxx(r.ctx, nil)
 	if err != nil {
 		return fmt.Errorf("can't start tx; error: %v", err)
 	}
 
 	defer func(tx *sqlx.Tx) {
 		if err := tx.Rollback(); err != nil {
-			log.Println(ctx, err.Error())
+			r.logger.Error(r.ctx, err.Error())
 		}
 	}(tx)
 
-	if err := tx.GetContext(ctx, &balance, `
+	if err := tx.GetContext(r.ctx, &balance, `
 SELECT  user_id, user_current, withdrawn
 FROM balance
 WHERE user_id = $1 FOR UPDATE SKIP LOCKED
 LIMIT 1`,
 		withdrawals.ID); err != nil {
 		if err != sql.ErrNoRows {
-			log.Println(ctx, err.Error())
+			r.logger.Error(r.ctx, err.Error())
 			return err
 		}
 	}
@@ -47,7 +50,7 @@ LIMIT 1`,
 		return fmt.Errorf("insufficient funds! on ammount: %v", balance.Current)
 	}
 
-	_, err = tx.ExecContext(ctx, `
+	_, err = tx.ExecContext(r.ctx, `
 UPDATE balance 
 SET user_current = $2, withdrawn = $3 
 WHERE user_id = $1`,
@@ -61,11 +64,11 @@ WHERE user_id = $1`,
 			}
 		}
 
-		log.Println(ctx, err.Error())
+		r.logger.Error(r.ctx, err.Error())
 		return err
 	}
 
-	_, err = tx.ExecContext(ctx, `
+	_, err = tx.ExecContext(r.ctx, `
 INSERT INTO withdrawals(user_id, order_number, sum) 
 VALUES ($1, $2, $3)`,
 		withdrawals.ID, withdrawals.Order, withdrawals.Sum,
@@ -78,12 +81,12 @@ VALUES ($1, $2, $3)`,
 			}
 		}
 
-		log.Println(ctx, err.Error())
+		r.logger.Error(r.ctx, err.Error())
 		return err
 	}
 
 	if err := tx.Commit(); err != nil {
-		log.Println(ctx, err.Error())
+		r.logger.Error(r.ctx, err.Error())
 		{
 			err := tx.Rollback()
 			if err != sql.ErrTxDone {
@@ -102,24 +105,24 @@ func (r *BalancePostgres) GetWithdrawals(userID string) ([]models.Withdrawals, e
 SELECT user_id, order_number, sum, processed_at 
 FROM withdrawals
 WHERE user_id = $1`
-	if err := r.db.Select(&balance, query, userID); err != nil {
+	if err := r.db.SelectContext(r.ctx, &balance, query, userID); err != nil {
 		return nil, err
 	}
 
 	return balance, nil
 }
 
-func (r *BalancePostgres) GetBalance(ctx context.Context, userID string) (models.Balance, error) {
+func (r *BalancePostgres) GetBalance(userID string) (models.Balance, error) {
 	balance := models.Balance{}
 
-	if err := r.db.GetContext(ctx, &balance, `
+	if err := r.db.GetContext(r.ctx, &balance, `
 SELECT  user_id, user_current, withdrawn
 FROM balance
 WHERE user_id = $1 FOR UPDATE SKIP LOCKED
 LIMIT 1`,
 		userID); err != nil {
 
-		log.Println(ctx, err.Error())
+		r.logger.Error(r.ctx, err.Error())
 		return balance, err
 	}
 

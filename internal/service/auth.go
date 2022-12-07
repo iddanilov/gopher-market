@@ -1,13 +1,17 @@
 package service
 
 import (
+	"context"
 	"crypto/sha1"
 	"errors"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/gopher-market/pkg/logging"
+	"time"
+
+	jwt "github.com/dgrijalva/jwt-go"
+
 	"github.com/gopher-market/internal/models"
 	"github.com/gopher-market/internal/storage"
-	"time"
 )
 
 const (
@@ -22,11 +26,17 @@ type tokenClaims struct {
 }
 
 type AuthService struct {
-	repo storage.Authorization
+	ctx    context.Context
+	repo   storage.Authorization
+	logger *logging.Logger
 }
 
-func NewAuthService(repo storage.Authorization) *AuthService {
-	return &AuthService{repo: repo}
+func NewAuthService(ctx context.Context, repo storage.Authorization, logger *logging.Logger) *AuthService {
+	return &AuthService{
+		ctx:    ctx,
+		repo:   repo,
+		logger: logger,
+	}
 }
 
 func (s *AuthService) CreateUser(user models.User) (int, error) {
@@ -37,6 +47,7 @@ func (s *AuthService) CreateUser(user models.User) (int, error) {
 func (s *AuthService) GenerateToken(username, password string) (string, error) {
 	user, err := s.repo.GetUser(username, generatePasswordHash(password))
 	if err != nil {
+		s.logger.Debug(err)
 		return "", err
 	}
 

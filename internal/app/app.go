@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"net"
 	"net/http"
 	"time"
@@ -15,7 +14,7 @@ import (
 
 	_ "github.com/gopher-market/doc"
 	"github.com/gopher-market/internal/config"
-	"github.com/gopher-market/internal/handler"
+	"github.com/gopher-market/internal/handlers"
 	"github.com/gopher-market/internal/service"
 	"github.com/gopher-market/internal/storage"
 	"github.com/gopher-market/internal/storage/postgres"
@@ -23,14 +22,14 @@ import (
 )
 
 type App struct {
+	ctx        context.Context
 	cfg        *config.Config
 	logger     *logging.Logger
 	router     *gin.Engine
 	httpServer *http.Server
 }
 
-func NewApp(cfg *config.Config, logger *logging.Logger) (App, error) {
-	ctx := context.Background()
+func NewApp(ctx context.Context, cfg *config.Config, logger *logging.Logger) (App, error) {
 	db, err := postgres.NewPostgresDB(cfg)
 	if err != nil {
 		logrus.Fatalf("failed to initialize db: %s", err.Error())
@@ -39,28 +38,29 @@ func NewApp(cfg *config.Config, logger *logging.Logger) (App, error) {
 	m := postgres.NewMigrationsPostgres(db)
 	err = m.CreateUserTable(ctx)
 	if err != nil {
-		log.Println(err)
+		logger.Error(err)
 	}
 	err = m.CreateOrdersTable(ctx)
 	if err != nil {
-		log.Println(err)
+		logger.Error(err)
 	}
 	err = m.CreateBalanceTable(ctx)
 	if err != nil {
-		log.Println(err)
+		logger.Error(err)
 	}
 	err = m.CreateWithdrawalsTable(ctx)
 
 	if err != nil {
-		log.Println(err)
+		logger.Error(err)
 	}
 
-	logger.Println("router initializing")
-	newStorage := storage.NewStorage(db)
-	services := service.NewService(newStorage, cfg)
-	routers := handler.NewHandler(services)
+	logger.Info("router initializing")
+	newStorage := storage.NewStorage(ctx, db, logger)
+	services := service.NewService(ctx, newStorage, cfg, logger)
+	routers := handlers.NewHandler(ctx, services, logger)
 
 	return App{
+		ctx:    ctx,
 		cfg:    cfg,
 		logger: logger,
 		router: routers.InitRoutes(),
@@ -80,7 +80,7 @@ func (a *App) startHTTP() {
 	var err error
 	listener, err = net.Listen("tcp", a.cfg.Listen.RunAddress)
 	if err != nil {
-		a.logger.Fatal(err)
+		a.logger.Info(err)
 	}
 
 	c := cors.New(cors.Options{
@@ -112,7 +112,7 @@ func (a *App) startHTTP() {
 			a.logger.Fatal(err)
 		}
 	}
-	err = a.httpServer.Shutdown(context.Background())
+	err = a.httpServer.Shutdown(a.ctx)
 	if err != nil {
 		a.logger.Fatal(err)
 	}

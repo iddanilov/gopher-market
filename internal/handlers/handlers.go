@@ -1,19 +1,28 @@
-package handler
+package handlers
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
-	_ "github.com/gopher-market/doc"
-	"github.com/gopher-market/internal/service"
 	swaggerFiles "github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
+
+	_ "github.com/gopher-market/doc"
+	"github.com/gopher-market/internal/service"
+	"github.com/gopher-market/pkg/logging"
 )
 
 type Handler struct {
+	ctx      context.Context
 	services *service.Service
+	logger   *logging.Logger
 }
 
-func NewHandler(services *service.Service) *Handler {
-	return &Handler{services: services}
+func NewHandler(ctx context.Context, services *service.Service, logger *logging.Logger) *Handler {
+	return &Handler{
+		ctx:      ctx,
+		services: services,
+		logger:   logger,
+	}
 }
 
 func (h *Handler) InitRoutes() *gin.Engine {
