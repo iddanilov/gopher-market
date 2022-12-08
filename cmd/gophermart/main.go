@@ -12,9 +12,6 @@ import (
 
 func main() {
 	ctx := context.Background()
-	//ctx, cancel := context.WithCancel(context.Background())
-	//ctx, cancel = context.WithTimeout(ctx, 1*time.Second)
-	//defer cancel()
 
 	log.Println("config initialing")
 	cfg := config.GetConfig()

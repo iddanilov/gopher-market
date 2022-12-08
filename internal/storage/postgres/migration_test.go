@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"github.com/jmoiron/sqlx"
-	"reflect"
 	"testing"
 )
 
@@ -110,26 +109,6 @@ func TestMigrationsPostgres_CreateWithdrawalsTable(t *testing.T) {
 			}
 			if err := m.CreateWithdrawalsTable(tt.args.ctx); (err != nil) != tt.wantErr {
 				t.Errorf("CreateWithdrawalsTable() error = %v, wantErr %v", err, tt.wantErr)
-			}
-		})
-	}
-}
-
-func TestNewMigrationsPostgres(t *testing.T) {
-	type args struct {
-		db *sqlx.DB
-	}
-	tests := []struct {
-		name string
-		args args
-		want *MigrationsPostgres
-	}{
-		// TODO: Add test cases.
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := NewMigrationsPostgres(tt.args.db); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewMigrationsPostgres() = %v, want %v", got, tt.want)
 			}
 		})
 	}

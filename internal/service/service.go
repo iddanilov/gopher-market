@@ -25,18 +25,25 @@ type Balance interface {
 	GetBalance(userID string) (models.Balance, error)
 }
 
+type Loyalty interface {
+	GetLoyalty()
+}
+
 type Service struct {
 	Authorization
 	Orders
 	Balance
-	cfg    *config.Config
-	logger *logging.Logger
+	Loyalty
+	cfg       *config.Config
+	logger    *logging.Logger
+	loyaltyCh chan models.LoyaltyChan
 }
 
-func NewService(ctx context.Context, repos *storage.Storage, cfg *config.Config, logger *logging.Logger) *Service {
+func NewService(ctx context.Context, repos *storage.Storage, cfg *config.Config, logger *logging.Logger, loyaltyCh chan models.LoyaltyChan) *Service {
 	return &Service{
 		Authorization: NewAuthService(ctx, repos.Authorization, logger),
-		Orders:        NewOrderService(ctx, repos.Orders, *cfg, logger),
+		Orders:        NewOrderService(ctx, repos.Orders, logger, loyaltyCh),
 		Balance:       NewBalanceService(ctx, repos.Balance, logger),
+		Loyalty:       NewLoyaltyService(ctx, repos.Orders, *cfg, logger, loyaltyCh),
 	}
 }

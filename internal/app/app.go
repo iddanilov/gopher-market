@@ -15,6 +15,7 @@ import (
 	_ "github.com/gopher-market/doc"
 	"github.com/gopher-market/internal/config"
 	"github.com/gopher-market/internal/handlers"
+	"github.com/gopher-market/internal/models"
 	"github.com/gopher-market/internal/service"
 	"github.com/gopher-market/internal/storage"
 	"github.com/gopher-market/internal/storage/postgres"
@@ -56,9 +57,12 @@ func NewApp(ctx context.Context, cfg *config.Config, logger *logging.Logger) (Ap
 
 	logger.Info("router initializing")
 	newStorage := storage.NewStorage(ctx, db, logger)
-	services := service.NewService(ctx, newStorage, cfg, logger)
+	loyaltyCh := make(chan models.LoyaltyChan, 10)
+	services := service.NewService(ctx, newStorage, cfg, logger, loyaltyCh)
 	routers := handlers.NewHandler(ctx, services, logger)
-
+	go func() {
+		services.Loyalty.GetLoyalty()
+	}()
 	return App{
 		ctx:    ctx,
 		cfg:    cfg,
