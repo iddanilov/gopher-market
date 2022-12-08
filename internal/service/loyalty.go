@@ -59,12 +59,24 @@ func (s *LoyaltyService) GetLoyalty() {
 
 func (s *LoyaltyService) sendLoyaltyRequest(order *models.AccrualOrder, loyalty models.LoyaltyChan) error {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/api/orders/%s", s.cfg.Accrual.Address, loyalty.OrderID), nil)
+	if err != nil {
+		s.logger.Error("ERROR can't make NewRequest: ", err)
+		return err
+	}
 	res, err := s.client.Do(req)
+	if err != nil {
+		s.logger.Error("ERROR response: ", err)
+		return err
+	}
 	if res.StatusCode != http.StatusOK {
 		return err
 	}
 
 	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		s.logger.Error("ERROR can't parse body: ", err)
+		return err
+	}
 	defer res.Body.Close()
 
 	err = json.Unmarshal(body, &order)
