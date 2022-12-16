@@ -1,9 +1,10 @@
 package postgres
 
 import (
+	"log"
+
 	"github.com/gopher-market/internal/config"
 	"github.com/jmoiron/sqlx"
-	"log"
 )
 
 func NewPostgresDB(cfg *config.Config) (*sqlx.DB, error) {
